@@ -3,6 +3,7 @@ import sys
 import pwd
 import grp
 from django.conf import settings
+from django.utils import six
 from django.template import Context, Template
 from django.core.management.base import BaseCommand
 
@@ -48,6 +49,14 @@ class Command(BaseCommand):
 
 		# Render the new output file, but only write it to disk if it has changed
 		if output != existing_output:
+			# Create directory if it doesn't already exist
+			output_dir = os.path.dirname(output_file)
+			if six.PY2:
+				if not os.path.isdir(output_dir):
+					os.makedirs(output_dir)
+			else:
+				os.makedirs(output_dir, exist_ok=True)
+			# Write to file
 			with open(output_file, 'w') as file:
 				file.write(output)
 			self.stdout.write("    Updated: {}".format(output_file))
